@@ -1,0 +1,31 @@
+name: 311 E2E Workflow
+run-name: Build, Deploy to UAT and Test - from user @${{ github.actor }}
+
+on: 
+  workflow_dispatch:
+    inputs:
+      sut:
+        description: 'Testsystem IP address'
+        required: true
+
+env:
+  UAT_IP: ${{ inputs.sut }}
+  UAT_TOMCAT: /home/ec2-user/tomcat/apache-tomcat-9.0.71/webapps
+  UAT_PORT: 22
+
+jobs:
+  check_env: 
+    runs-on: ubuntu-latest
+    environment: UAT
+    
+    steps: 
+     - name: print IP address
+       run: echo ${{ env.UAT_IP }}
+
+     - name: lookup if $UAT_IP is accessible
+       uses: appleboy/ssh-action@master
+       with:
+         host: ${{ env.UAT_IP }}
+         username: ${{ secrets.USER }}
+         key: ${{ secrets.SSH_KEY }}
+         port: ${{ env.UAT_PORT }}
